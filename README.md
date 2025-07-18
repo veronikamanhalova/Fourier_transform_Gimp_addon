@@ -1,6 +1,6 @@
-# 2D: Application and Visualization of 3D Fourier Transform for GIF Files
+# 2D: Application and Visualization of Fast Fourier Transform for GIF Files
 
-This semester project focuses on applying and visualizing the 3D Fourier Transform for GIF-format files. It computes the amplitude, phase, and power spectra.
+This semester project focuses on applying and visualizing the Fourier Transform for GIF-format files. It computes the amplitude, phase, and power spectra.
 
 [![Watch the video](https://img.youtube.com/vi/hQY2kOMyiOw/0.jpg)](https://www.youtube.com/watch?v=hQY2kOMyiOw)
 
@@ -20,7 +20,7 @@ The plugin is written in Python and is designed for the Krita application.
 ## Theoretical Documentation
 
 Fourier Transform is a mathematical method for decomposing a signal into its frequency components.  
-In this case, a 3D FT is applied by processing each frame of the GIF with a 2D FT, treating the frame sequence as the third dimension.
+In this case, a FFT is applied to each frame of the GIF.
 
 The FT decomposes the image into frequency components:
 
