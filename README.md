@@ -1,131 +1,134 @@
-# 2D: Aplikace a zobrazení 3D Fourierovy transformace pro soubory formátu GIF
+# 2D: Application and Visualization of 3D Fourier Transform for GIF Files
 
-Semestrální práce je na téma aplikace a zobrazení 3D Fourierovy transformace pro soubory ve formátu GIF.
-Počítá amplitudové, fázové a power spektrum.
+This semester project focuses on applying and visualizing the 3D Fourier Transform for GIF-format files. It computes the amplitude, phase, and power spectra.
 
-![bitmap - obrázek](2d.jpg "EDIT|UPLOAD")
+![bitmap - image](2d.jpg "EDIT|UPLOAD")
 
-![bitmap - video](2d.mp4 "EDIT|UPLOAD")
+🎥 [Click to watch demo video](./2d.mp4)
 
-## Uživatelská dokumentace
+## User Documentation
 
-Plugin je napsaný v jazyce Python a je určený pro aplikaci Krita. 
+The plugin is written in Python and is designed for the Krita application.
 
-### Použití:
+### How to Use:
 
-1. Vložte soubory pluginu do složky pro pluginy s názvem pykrita v aplikaci Krita.
-2. Restartujte aplikaci Krita a v Python Plugin Manageru zaškrtněte plugin s názvem "fft".
-3. Otevřete menu Nástroje > Skripty > FFT GIF.
-4. Vybere si GIF soubor, který chcete nahrát. Nejlépe volte GIF soubory s nižším počtem snímků pro kratší dobu zpracovávání pluginem.
-5. Plugin načte jednotlivé snímky GIFu, provede na každém snímku 2D Fourierovu transformaci a zobrazí výsledky (amplitudové, fázové a power spektrum) jako vrstvy v dokumentu Krita. 
-6. Po dokončení můžete zvolit, jestli chcete uložit výsledky jako samostatné GIFy pro každé spektrum.
+1. Place the plugin files into the `pykrita` plugin folder in Krita.
+2. Restart Krita and enable the plugin named **"fft"** in the Python Plugin Manager.
+3. Open the menu: **Tools > Scripts > FFT GIF**.
+4. Select the GIF file you want to process. It's recommended to use GIFs with fewer frames for faster processing.
+5. The plugin loads each frame of the GIF, performs a 2D Fourier Transform on each one, and displays the results (amplitude, phase, and power spectra) as separate layers in the Krita document.
+6. After processing, you will be prompted to optionally save the results as separate GIFs for each spectrum.
 
-## Teoretická dokumentace
+## Theoretical Documentation
 
-Fourierova transformace je matematický postup umožňující rozložit signál na jednotlivé frekvence. 
-V mém případě pracuji s 3D FT, kdy zpracovávám snímky GIFu pomocí 2D FT a jako 3. rozměr uvažuji všechny snímky GIFu jdoucí za sebou.
+Fourier Transform is a mathematical method for decomposing a signal into its frequency components.  
+In this case, a 3D FT is applied by processing each frame of the GIF with a 2D FT, treating the frame sequence as the third dimension.
 
-FT rozdělí obraz na různé složky frekvencí:
+The FT decomposes the image into frequency components:
 
-- **Amplitudové spektrum**: 
-  - Ukazuje, jaké frekvence v obraze převažují. To znamená, jestli v obraze převažují spíše detaily (vysoké frekvence) anebo spíše větší jednotvárné plohy (nízké frekvence). 
-  - Hodnoty amplitud jsou na snímku umístěny tak, že nízké frekvence se nacházejí uprostřed a vysoké frekvence jsou uložené směrem ke krajům. 
-  - Tato složka je užitečná například při analýze textur nebo identifikaci opakujících se vzorů v obraze.
-- **Fázové spektrum**: 
-  - Zobrazuje posun jednotlivých frekvencí, tj. informace o tom, kde jsou konkrétní frekvenční složky v obraze umístěny. 
-  - Okem není moc dobře čitelné, protože se jeho hodnoty pohybují mezi -π a π.
-  - Podobně jako u amplitudy jsou nízkofrekvenční fáze blízko středu snímku a vysokofrekvenční směrem ke krajům.
-  - Fázové spektrum je zásadní pro rekonstrukci původního signálu a to platí i u rekonstrukce obrazu. 
-- **Power spektrum**: 
-  - Vyjadřuje intenzitu jednotlivých frekvencí, tj. míra energie, kterou každá frekvence v obraze nese.
-  - Vypadá podobně jako amplitudové spektrum, kde jsou hodnoty na obraze vůči sobě ve větším kontrastu.
-  - Nejvyšší hodnoty (energie) jsou uprostřed snímku a nižší pak směrem k okrajům.
+- **Amplitude Spectrum**:  
+  - Shows which frequencies dominate in the image—whether it's rich in details (high frequencies) or has large uniform areas (low frequencies).
+  - Low frequencies are centered in the image; high frequencies are toward the edges.
+  - Useful for texture analysis or identifying repeating patterns.
 
-### Výpočet FT
-- **fft_result = np.fft.fft2(frame)**
-  - `frame`: Černobílý snímek GIFu.
-  - `np.fft.fft2(frame)`: Aplikuje 2D diskrétní Fourierovu transformaci na snímek. Nízké frekvence jsou směrem ke krajům snímku a vysoké uprostřed.
-- **fft_shifted = np.fft.fftshift(fft_result)**
-  - `np.fft.fftshift(fft_result)`: Přeuspořádá výstup Fourierovy transformace tak, aby nízké frekvence byly uprostřed snímku a vysoké směrem ke krajům.
+- **Phase Spectrum**:  
+  - Represents the phase shift of individual frequencies—i.e., where the frequency components are located in the image.
+  - Hard to interpret visually as the values range from -π to π.
+  - Like the amplitude spectrum, low-frequency phases are in the center, high-frequency near the edges.
+  - Crucial for reconstructing the original signal or image.
 
-### Výpočet amplitudy, fáze a power spektra
-- **Amplituda**:
-  - `magnitude = np.log(np.abs(fft_result) + 1)`
-  - `np.abs(fft_result)`: Vypočítá absolutní hodnotu (velikost) komplexních čísel ve výstupu Fourierovy transformace.
-  - `np.log(... + 1)`: Aplikuje na abs. hodnoty komplexních čísel logaritmus a zlepšuje tak viditelnost nižších frekvencí ve výsledném obrazu. Přičítá se 1, abychom se vyhnuli logaritmu z 0.
-- **Fáze**:
-  - `phase = np.angle(fft_result)`
-  - `np.angle(fft_result)`: Vypočítá úhel komplexního čísla.
-- **Power**:
-  - `power = magnitude ** 2`
-  - `magnitude ** 2`: Vypočítá čtverec amplitudy a zvýrazní tak v obraze rozdíly mezi vyššími a nižšími frekvencemi.
+- **Power Spectrum**:  
+  - Indicates the intensity or energy of individual frequencies in the image.
+  - Visually similar to the amplitude spectrum but with higher contrast.
+  - Highest values (energy) appear in the center, with lower values toward the edges.
 
-### Normalizace spectra
-- `255 * (data / np.max(data)).np.uint8`
-- `data`: Hodnoty spektra.
-- `data / np.max(data)`: Hodnoty spektra jsou poděleny jejich maximální hodnotou a dostaneme tak Hodnoty mezi 0-1.
-- `255 * (...)`: Hodnoty jsou naškálovány do rozsahu 0–255.
-- `... .np.uint8`: Hodnoty jsou převedeny na celá čísla.
+### FT Computation
 
-## Programátorská dokumentace
+- **`fft_result = np.fft.fft2(frame)`**  
+  - `frame`: Grayscale frame of the GIF.  
+  - Applies a 2D discrete FT. Low frequencies are initially on the edges.
 
-Plugin je napsaný v jazyce Python a využívá následující knihovny:
-  - `krita`: Pro práci s dokumenty a vrstvami v Krita API.
-  - `numpy`: Pro numerické výpočty, FFT transformace a manipulace s daty.
-  - `Pillow`: Pro práci s obrázky.
-  - `PyQt5`: Pro interakci s uživatelem (dialogy, různá potvrzení, atd.).
+- **`fft_shifted = np.fft.fftshift(fft_result)`**  
+  - Re-centers low frequencies to the middle of the frame.
 
-### Průběh pluginu
-**1. Aktivace pluginu**
-  - Uživatel aktivuje plugin prostřednictvím menu: **Tools -> Scripts -> FFT GIF**
-  - Zavolá se metoda `get_fft_gifs()`, která řídí hlavní logiku pluginu.
+### Computing Amplitude, Phase, and Power Spectra
 
-**2. Výběr GIF souboru**
-  - Plugin vyzve uživatele k výběru GIF souboru prostřednictvím dialogového okna: "Select a GIF File"**
+- **Amplitude**:  
+  - `magnitude = np.log(np.abs(fft_result) + 1)`  
+  - Calculates the absolute value and applies a logarithm to enhance lower frequencies' visibility. Adding 1 avoids log(0).
 
-- **Uživatel zvolí GIF soubor:**
-  - Soubor je načten a rozdělen na jednotlivé snímky (frames).
-  - Každý snímek je převeden na černobílý obrázek.
-  - Pokud GIF neobsahuje snímky, zobrazí se chybová hláška: "Failed to load GIF frames." a plugin se ukončí.
-- **Uživatel nezvolí soubor:**
-  - Zobrazí se chybová hláška: "Didn't select a GIF file"
-  - Plugin se ukončí.
+- **Phase**:  
+  - `phase = np.angle(fft_result)`  
+  - Computes the phase angle of complex numbers.
 
-**3. Výpočet Fourierovy transformace**
-  - Pro každý snímek GIFu se provádí následující operace:
-1. **Fourierova transformace (FFT):**  
-   - Na snímek se aplikuje metoda `apply_fft(frame)`, která provádí 2D FFT.  
-   - Výstupem je spektrum frekvencí ve formě numpy pole.
-2. **Výpočet spekter:**  
-   - Metoda `get_spectrum(fft_result)` vypočítá amplitudové, fázové a power spektra.
-   - Spektra jsou normalizována (`normalize_spectrum`) a převedena na černobílé obrázky (`data_to_frame`).
-3. **Uložení výsledků:**  
-   - Výsledná spektra jsou uložena do seznamů (`magnitude_frames`, `phase_frames`, `power_frames`) pro další zpracování.
+- **Power**:  
+  - `power = magnitude ** 2`  
+  - Squares the amplitude to emphasize differences between high and low frequencies.
 
-**4. Zobrazení výsledků v Kritě**
-  - Plugin zobrazí originální snímky GIFu a jejich spektra jako nové vrstvy v aktivním dokumentu Krita pomocí funkce `show_results_in_krita()`.
-  - Pokud není žádný aktivní dokument, zobrazí se chyba: "No active document", spustí se čištění paměti a plugin se ukončí.
-  - Vytvoří se skupiny vrstev: `Original grayscale`, `Magnitude`, `Phase`, `Power`
-  - Každý snímek je jako vrstva přidán do příslušné skupiny a po ukončení pluginu se zobrazí.
+### Spectrum Normalization
 
-**5. Uložení výsledků**
-  - Po zobrazení výsledků se uživateli zobrazí dialogové okno: "Do you want to save the generated spectrum GIFs?"
+- `255 * (data / np.max(data)).np.uint8`  
+  - Scales spectrum values between 0–255 and converts them to integers for image display.
 
-- **Uživatel zvolí "Yes":**
-  - Plugin vyzve k výběru cesty pro uložení výsledků.
-  - Uloží tři generované GIFy:
-    - **Amplitudové spektrum**
-    - **Fázové spektrum**
-    - **Power spektrum**
-  - Pokud uživatel nezadá cestu, zobrazí se: "No path selected.", spustí se čištění paměti a plugin se ukončí.
-- **Uživatel zvolí "No":**
-  - Spustí se čištění paměti a plugin se ukončí.
+## Developer Documentation
 
-**6. Vyčištění paměti**
-Plugin po dokončení všech kroků vymaže dočasné snímky z paměti metodou `clear_all_frames()`.
+The plugin is written in Python and uses the following libraries:
+- `krita`: To interact with Krita's document and layer system.
+- `numpy`: For numerical computations and FFT.
+- `Pillow`: For image processing.
+- `PyQt5`: For user interaction (dialogs, confirmations, etc.).
 
-## Zdroje
-Pro zpracování semestrální práce byly využity následující zdroje:  
-- **Prezentace z přednášek BI-PGA:** Sloužily jako teoretický základ pro pochopení Fourierovy transformace a její aplikace.  
-- **Dokumentace Krita:** Poskytla základní informace o rozhraní pro vývoj pluginů, práci s vrstvami a integraci Pythonu do Krita.  
-- **Dotazování ChatGPT:** Pomohlo při vysvětlování složitějších částí kódu, návrhu struktury pluginu a objasnění matematických operací spojených s Fourierovou transformací.  
+### Plugin Workflow
+
+**1. Plugin Activation**
+- Activated via **Tools -> Scripts -> FFT GIF**
+- Calls the `get_fft_gifs()` method which controls the main logic.
+
+**2. GIF File Selection**
+- A dialog prompts the user to choose a GIF file.
+- If a file is selected:
+  - It's split into individual frames and converted to grayscale.
+  - If the file has no frames, an error message is shown: *"Failed to load GIF frames."*
+- If no file is selected:
+  - Error message: *"Didn't select a GIF file"*
+  - Plugin terminates.
+
+**3. Fourier Transform Calculation**
+For each frame:
+1. **FFT**:  
+   - `apply_fft(frame)` performs a 2D FFT.
+2. **Spectrum Calculation**:  
+   - `get_spectrum(fft_result)` calculates and normalizes amplitude, phase, and power spectra.
+3. **Storing Results**:  
+   - Results are stored in `magnitude_frames`, `phase_frames`, and `power_frames`.
+
+**4. Displaying Results in Krita**
+- Uses `show_results_in_krita()` to show original frames and their spectra as layers in the active document.
+- If no active document exists, shows: *"No active document"*, clears memory, and exits.
+- Creates layer groups: `Original grayscale`, `Magnitude`, `Phase`, `Power`.
+- Each frame is added to its corresponding group.
+
+**5. Saving Results**
+- User is prompted: *"Do you want to save the generated spectrum GIFs?"*
+
+- If **Yes**:
+  - Asks for save path.
+  - Saves three separate GIFs:
+    - **Amplitude Spectrum**
+    - **Phase Spectrum**
+    - **Power Spectrum**
+  - If no path is selected: *"No path selected."*
+
+- If **No**:
+  - Proceeds to memory cleanup and exits.
+
+**6. Memory Cleanup**
+- Temporary frames are removed using `clear_all_frames()`.
+
+## Sources
+
+The following sources were used during the project:
+
+- **BI-PGA Lecture Slides**: Provided the theoretical foundation on Fourier Transform and its applications.  
+- **Krita Documentation**: Helped with understanding the plugin API, layers, and Python integration.  
+- **ChatGPT Inquiries**: Used to explain complex parts of the code, structure the plugin, and clarify mathematical operations related to the Fourier Transform.
