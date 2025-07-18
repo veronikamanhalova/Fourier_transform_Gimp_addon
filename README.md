@@ -2,9 +2,7 @@
 
 This semester project focuses on applying and visualizing the 3D Fourier Transform for GIF-format files. It computes the amplitude, phase, and power spectra.
 
-![bitmap - image](2d.jpg "EDIT|UPLOAD")
-
-🎥 [Click to watch demo video](./2d.mp4)
+[![Watch the video](https://img.youtube.com/vi/hQY2kOMyiOw/0.jpg)](https://www.youtube.com/watch?v=hQY2kOMyiOw)
 
 ## User Documentation
 
